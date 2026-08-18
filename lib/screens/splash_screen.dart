@@ -77,28 +77,30 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Modern QR Code icon container with a subtle glow/shadow
+                      // App Logo container with a subtle glow/shadow
                       Container(
-                        padding: const EdgeInsets.all(24),
+                        width: 100,
+                        height: 100,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E293B).withOpacity(0.4),
-                          shape: BoxShape.circle,
+                          borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: const Color(0xFF0EA5E9).withOpacity(0.3),
-                            width: 1.5,
+                            color: const Color(0xFF0EA5E9).withValues(alpha: 0.4),
+                            width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF0EA5E9).withOpacity(0.15),
-                              blurRadius: 40,
-                              spreadRadius: 5,
+                              color: const Color(0xFF0EA5E9).withValues(alpha: 0.25),
+                              blurRadius: 30,
+                              spreadRadius: 4,
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.qr_code_scanner_rounded,
-                          size: 72,
-                          color: Color(0xFF0EA5E9), // Ocean Blue Accent
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: Image.asset(
+                            'assets/logo.png',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/scan_item.dart';
+import '../models/scan_result.dart';
 import '../services/storage_service.dart';
+import '../widgets/link_preview_sheet.dart';
 import 'scanner_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -36,15 +38,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Trigger scanning process.
   Future<void> _startScanning() async {
-    final scannedResult = await Navigator.of(context).push<String>(
+    final result = await Navigator.of(context).push<dynamic>(
       MaterialPageRoute(
         builder: (context) => const ScannerScreen(),
       ),
     );
 
-    if (scannedResult != null && scannedResult.isNotEmpty) {
+    String? scannedUrl;
+    bool shouldLaunch = false;
+
+    if (result is ScanResult) {
+      scannedUrl = result.url;
+      shouldLaunch = result.shouldLaunch;
+    } else if (result is String) {
+      scannedUrl = result;
+      shouldLaunch = true;
+    }
+
+    if (scannedUrl != null && scannedUrl.isNotEmpty) {
       final newItem = ScanItem(
-        url: scannedResult,
+        url: scannedUrl,
         timestamp: DateTime.now(),
       );
 
@@ -56,8 +69,22 @@ class _HomeScreenState extends State<HomeScreen> {
       // 2. Save updated list to local JSON file
       await _storageService.saveHistory(_history);
 
-      // 3. Automatically launch the scanned URL in the external browser
-      await _launchURL(scannedResult);
+      // 3. Launch URL if requested
+      if (shouldLaunch) {
+        await _launchURL(scannedUrl);
+      }
+    }
+  }
+
+  /// Show Link Preview Bottom Sheet for an item in history
+  Future<void> _showItemLinkPreview(String rawContent) async {
+    final action = await LinkPreviewSheet.show(context, rawContent: rawContent);
+    if (!mounted) return;
+
+    if (action == LinkPreviewAction.open) {
+      await _launchURL(rawContent);
+    } else if (action == LinkPreviewAction.copy) {
+      _showSnackBar('Link berhasil disalin!');
     }
   }
 
@@ -136,14 +163,30 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'CLOUD SCANNER',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.0,
-          ),
+        title: Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              margin: const EdgeInsets.only(right: 10),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/logo.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const Text(
+              'CLOUD SCANNER',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ],
         ),
         centerTitle: false,
         actions: [
@@ -371,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => _launchURL(item.url),
+        onTap: () => _showItemLinkPreview(item.url),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
           child: Row(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/scan_result.dart';
+import '../widgets/link_preview_sheet.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -18,6 +20,54 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
   late Animation<double> _scanLineAnimation;
   bool _isScanCompleted = false;
 
+  Future<void> _handleQrCodeDetected(String rawValue) async {
+    if (_isScanCompleted) return;
+    setState(() {
+      _isScanCompleted = true;
+    });
+
+    try {
+      await _controller.stop();
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    final action = await LinkPreviewSheet.show(context, rawContent: rawValue);
+
+    if (!mounted) return;
+
+    if (action == LinkPreviewAction.open) {
+      Navigator.of(context).pop(ScanResult(url: rawValue, shouldLaunch: true));
+    } else if (action == LinkPreviewAction.copy) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 20),
+              SizedBox(width: 10),
+              Text('Link berhasil disalin!', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+          backgroundColor: const Color(0xFF1E293B),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      Navigator.of(context).pop(ScanResult(url: rawValue, shouldLaunch: false));
+    } else {
+      // Action rescan or modal dismissed -> resume camera
+      try {
+        await _controller.start();
+      } catch (_) {}
+      if (mounted) {
+        setState(() {
+          _isScanCompleted = false;
+        });
+      }
+    }
+  }
+
   Future<void> _scanFromGallery() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -27,12 +77,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
       if (barcode != null && barcode.barcodes.isNotEmpty) {
         final rawValue = barcode.barcodes.first.rawValue;
         if (rawValue != null && rawValue.isNotEmpty) {
-          setState(() {
-            _isScanCompleted = true;
-          });
-          if (mounted) {
-            Navigator.of(context).pop(rawValue);
-          }
+          await _handleQrCodeDetected(rawValue);
         } else {
           _showNoQrCodeSnackBar();
         }
@@ -169,9 +214,7 @@ class _ScannerScreenState extends State<ScannerScreen> with SingleTickerProvider
               if (barcodes.isNotEmpty) {
                 final rawValue = barcodes.first.rawValue;
                 if (rawValue != null && rawValue.isNotEmpty) {
-                  _isScanCompleted = true;
-                  // Pop screen and return URL string
-                  Navigator.of(context).pop(rawValue);
+                  _handleQrCodeDetected(rawValue);
                 }
               }
             },
