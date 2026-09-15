@@ -142,7 +142,7 @@ class LinkPreviewSheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -156,10 +156,10 @@ class LinkPreviewSheet extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: security.backgroundColor.withOpacity(0.5),
+                    color: security.backgroundColor.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: security.color.withOpacity(0.4),
+                      color: security.color.withValues(alpha: 0.4),
                       width: 1.5,
                     ),
                   ),
@@ -193,7 +193,7 @@ class LinkPreviewSheet extends StatelessWidget {
                           color: security.backgroundColor,
                           borderRadius: BorderRadius.circular(6),
                           border: Border.all(
-                            color: security.color.withOpacity(0.3),
+                            color: security.color.withValues(alpha: 0.3),
                             width: 1,
                           ),
                         ),
@@ -233,7 +233,7 @@ class LinkPreviewSheet extends StatelessWidget {
                 color: const Color(0xFF0F172A),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: 0.08),
                   width: 1,
                 ),
               ),
@@ -242,7 +242,7 @@ class LinkPreviewSheet extends StatelessWidget {
                 child: SelectableText(
                   rawContent,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 13,
                     height: 1.4,
                     fontFamily: 'monospace',
@@ -270,7 +270,7 @@ class LinkPreviewSheet extends StatelessWidget {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(
-                        color: Colors.white.withOpacity(0.2),
+                        color: Colors.white.withValues(alpha: 0.2),
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
@@ -308,7 +308,7 @@ class LinkPreviewSheet extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF0EA5E9).withOpacity(0.3),
+                          color: const Color(0xFF0EA5E9).withValues(alpha: 0.3),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),

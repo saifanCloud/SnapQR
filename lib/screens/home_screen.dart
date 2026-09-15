@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF0EA5E9).withOpacity(0.3),
+                        color: const Color(0xFF0EA5E9).withValues(alpha: 0.3),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       ),
@@ -268,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Icon(
                           Icons.qr_code_scanner_rounded,
                           size: 140,
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                         ),
                       ),
                       Center(
@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       '${_history.length} items',
                       style: TextStyle(
-                        color: const Color(0xFF94A3B8).withOpacity(0.8),
+                        color: const Color(0xFF94A3B8).withValues(alpha: 0.8),
                         fontSize: 12,
                       ),
                     ),
@@ -368,13 +368,13 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1E293B).withOpacity(0.4),
+            color: const Color(0xFF1E293B).withValues(alpha: 0.4),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.history_rounded,
             size: 48,
-            color: const Color(0xFF94A3B8).withOpacity(0.3),
+            color: const Color(0xFF94A3B8).withValues(alpha: 0.3),
           ),
         ),
         const SizedBox(height: 16),
@@ -391,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
           'Your scanned QR codes will be logged here.',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: const Color(0xFF94A3B8).withOpacity(0.6),
+            color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
             fontSize: 13,
           ),
         ),
@@ -408,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: Colors.white.withOpacity(0.04),
+          color: Colors.white.withValues(alpha: 0.04),
           width: 1,
         ),
       ),
@@ -453,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Text(
                       _formatDateTime(item.timestamp),
                       style: TextStyle(
-                        color: const Color(0xFF94A3B8).withOpacity(0.8),
+                        color: const Color(0xFF94A3B8).withValues(alpha: 0.8),
                         fontSize: 11,
                       ),
                     ),
