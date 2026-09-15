@@ -39,8 +39,24 @@ class LinkPreviewSheet extends StatelessWidget {
     );
   }
 
-  /// Check if the content is a web URL
+  /// Dangerous URL schemes that must never be opened
+  static const _blockedSchemes = [
+    'javascript:',
+    'vbscript:',
+    'data:',
+    'file:',
+    'blob:',
+  ];
+
+  /// Returns true if the content contains a blocked/dangerous scheme
+  bool get _isDangerousUrl {
+    final lower = rawContent.trim().toLowerCase();
+    return _blockedSchemes.any((scheme) => lower.startsWith(scheme));
+  }
+
+  /// Check if the content is a safe web URL (http/https only)
   bool get _isUrl {
+    if (_isDangerousUrl) return false;
     final trimmed = rawContent.trim();
     if (trimmed.startsWith(RegExp(r'https?://', caseSensitive: false))) {
       return true;
@@ -50,7 +66,7 @@ class LinkPreviewSheet extends StatelessWidget {
     return domainRegExp.hasMatch(trimmed);
   }
 
-  /// Get formatted URL with scheme
+  /// Get formatted URL with scheme (always https for bare domains)
   String get _formattedUrl {
     final trimmed = rawContent.trim();
     if (trimmed.startsWith(RegExp(r'https?://', caseSensitive: false))) {
@@ -71,10 +87,17 @@ class LinkPreviewSheet extends StatelessWidget {
     return 'Web Link';
   }
 
-  /// Security status info (HTTPS vs HTTP vs Text)
+  /// Security status info (HTTPS vs HTTP vs Dangerous vs Text)
   _SecurityInfo get _securityInfo {
     final trimmed = rawContent.trim().toLowerCase();
-    if (trimmed.startsWith('https://')) {
+    if (_isDangerousUrl) {
+      return const _SecurityInfo(
+        label: 'BERBAHAYA - Blokir',
+        icon: Icons.dangerous_rounded,
+        color: Color(0xFFEF4444), // Red
+        backgroundColor: Color(0xFF7F1D1D),
+      );
+    } else if (trimmed.startsWith('https://')) {
       return const _SecurityInfo(
         label: 'HTTPS (Aman / Secure)',
         icon: Icons.lock_rounded,
@@ -315,13 +338,16 @@ class LinkPreviewSheet extends StatelessWidget {
                       ],
                     ),
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (onOpen != null) {
-                          onOpen!();
-                        } else {
-                          Navigator.of(context).pop(LinkPreviewAction.open);
-                        }
-                      },
+                      // Block dangerous URLs from being opened
+                      onPressed: _isDangerousUrl
+                          ? null
+                          : () {
+                              if (onOpen != null) {
+                                onOpen!();
+                              } else {
+                                Navigator.of(context).pop(LinkPreviewAction.open);
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
                         shadowColor: Colors.transparent,

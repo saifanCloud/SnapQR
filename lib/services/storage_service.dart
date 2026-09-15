@@ -37,10 +37,13 @@ class StorageService {
   }
 
   /// Saves the updated list of ScanItems to the local JSON file.
+  /// Hard-capped at 500 items to prevent unbounded storage growth.
   Future<bool> saveHistory(List<ScanItem> history) async {
     try {
       final file = await _localFile;
-      final serializedList = history.map((item) => item.toJson()).toList();
+      // Cap history at 500 items (keep the most recent)
+      final capped = history.length > 500 ? history.sublist(0, 500) : history;
+      final serializedList = capped.map((item) => item.toJson()).toList();
       final jsonString = jsonEncode(serializedList);
       await file.writeAsString(jsonString);
       return true;

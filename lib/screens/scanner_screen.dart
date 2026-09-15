@@ -96,6 +96,13 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   Future<void> _handleQrCodeDetected(String rawValue) async {
     if (_isScanCompleted) return;
+
+    // Security: Reject payloads that are unreasonably large (> 4096 chars)
+    if (rawValue.length > 4096) {
+      _showErrorSnackBar('QR code terlalu panjang dan tidak dapat diproses.');
+      return;
+    }
+
     setState(() {
       _isScanCompleted = true;
     });

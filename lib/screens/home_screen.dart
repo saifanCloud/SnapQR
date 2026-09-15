@@ -92,6 +92,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _launchURL(String urlString) async {
     String sanitizedUrl = urlString.trim();
 
+    // Block dangerous URL schemes (e.g. javascript:, file:, data:)
+    final lower = sanitizedUrl.toLowerCase();
+    const blockedSchemes = ['javascript:', 'vbscript:', 'data:', 'file:', 'blob:'];
+    if (blockedSchemes.any((s) => lower.startsWith(s))) {
+      _showSnackBar('URL ini diblokir karena mengandung skema berbahaya.', isError: true);
+      return;
+    }
+
     // Check if it is a valid scheme, otherwise prepend https://
     if (!sanitizedUrl.startsWith(RegExp(r'https?://', caseSensitive: false))) {
       sanitizedUrl = 'https://$sanitizedUrl';
@@ -99,13 +107,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final Uri uri = Uri.parse(sanitizedUrl);
+      // Only allow http and https schemes
+      if (uri.scheme != 'http' && uri.scheme != 'https') {
+        _showSnackBar('Hanya URL http/https yang diizinkan untuk dibuka.', isError: true);
+        return;
+      }
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
         _showSnackBar('Could not launch browser for this QR code contents.', isError: true);
       }
     } catch (e) {
-      _showSnackBar('Invalid URL format: $urlString', isError: true);
+      _showSnackBar('Invalid URL format.', isError: true);
     }
   }
 
