@@ -124,6 +124,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (!success) {
       setState(() => _history.insert(index, removedItem));
       _showSnackBar('Gagal menghapus item.', isError: true);
+    } else {
+      _showSnackBar('Riwayat berhasil dihapus.');
     }
   }
 
@@ -473,7 +475,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       onPressed: () async {
                         Navigator.of(context).pop();
                         setState(() => _history.clear());
-                        await _storageService.saveHistory(_history);
+                        final success = await _storageService.clearHistory();
+                        if (success) {
+                          _showSnackBar('Semua riwayat berhasil dihapus.');
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEF4444).withValues(alpha: 0.15),
@@ -592,16 +597,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
 
             // Delete
-            GestureDetector(
-              onTap: () => _deleteItem(index),
-              child: Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: Icon(
-                  Icons.close_rounded,
-                  size: 16,
-                  color: Colors.white.withValues(alpha: 0.20),
-                ),
+            IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                size: 16,
+                color: Colors.white.withValues(alpha: 0.35),
               ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              splashRadius: 18,
+              tooltip: 'Hapus riwayat',
+              onPressed: () => _deleteItem(index),
             ),
           ],
         ),
