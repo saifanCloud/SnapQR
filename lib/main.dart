@@ -3,21 +3,18 @@ import 'package:flutter/services.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
-  // Ensure Flutter engine bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Force portrait orientation
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Configure system status bar styling
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: Color(0xFF0F172A),
+    systemNavigationBarColor: Color(0xFF0E0E0E),
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
@@ -30,23 +27,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Cloud Scanner',
+      title: 'SnapQR',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        scaffoldBackgroundColor: const Color(0xFF111111),
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF0EA5E9), // Ocean Blue Accent
-          secondary: Color(0xFF0284C7),
-          surface: Color(0xFF1E293B),
-          onPrimary: Colors.white,
-          onSecondary: Colors.white,
+          primary: Color(0xFFE0E0E0),    // Light grey accent
+          secondary: Color(0xFFB0B0B0),  // Muted grey
+          surface: Color(0xFF1C1C1C),    // Card surface
+          onPrimary: Color(0xFF111111),
+          onSecondary: Color(0xFF111111),
           onSurface: Colors.white,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF0F172A),
+          backgroundColor: Color(0xFF111111),
           elevation: 0,
           scrolledUnderElevation: 0,
           iconTheme: IconThemeData(color: Colors.white),
@@ -58,13 +55,13 @@ class MyApp extends StatelessWidget {
           ),
         ),
         cardTheme: CardThemeData(
-          color: const Color(0xFF1E293B),
+          color: const Color(0xFF1C1C1C),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-        fontFamily: 'Roboto', // Modern, clean typography from default SDK
+        fontFamily: 'Roboto',
       ),
       home: const SplashScreen(),
     );

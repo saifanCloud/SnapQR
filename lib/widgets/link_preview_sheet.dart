@@ -21,7 +21,6 @@ class LinkPreviewSheet extends StatelessWidget {
     this.onRescan,
   });
 
-  /// Helper to show the bottom sheet modal
   static Future<LinkPreviewAction?> show(
     BuildContext context, {
     required String rawContent,
@@ -30,6 +29,7 @@ class LinkPreviewSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
       builder: (context) => LinkPreviewSheet(
         rawContent: rawContent,
         onOpen: () => Navigator.of(context).pop(LinkPreviewAction.open),
@@ -48,25 +48,21 @@ class LinkPreviewSheet extends StatelessWidget {
     'blob:',
   ];
 
-  /// Returns true if the content contains a blocked/dangerous scheme
   bool get _isDangerousUrl {
     final lower = rawContent.trim().toLowerCase();
     return _blockedSchemes.any((scheme) => lower.startsWith(scheme));
   }
 
-  /// Check if the content is a safe web URL (http/https only)
   bool get _isUrl {
     if (_isDangerousUrl) return false;
     final trimmed = rawContent.trim();
     if (trimmed.startsWith(RegExp(r'https?://', caseSensitive: false))) {
       return true;
     }
-    // Check simple domain pattern like google.com, example.org/path
     final domainRegExp = RegExp(r'^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(/.*)?$');
     return domainRegExp.hasMatch(trimmed);
   }
 
-  /// Get formatted URL with scheme (always https for bare domains)
   String get _formattedUrl {
     final trimmed = rawContent.trim();
     if (trimmed.startsWith(RegExp(r'https?://', caseSensitive: false))) {
@@ -75,55 +71,46 @@ class LinkPreviewSheet extends StatelessWidget {
     return 'https://$trimmed';
   }
 
-  /// Extract host domain name for title (e.g. google.com, github.com)
   String get _domainHost {
-    if (!_isUrl) return 'Text Content';
+    if (!_isUrl) return 'Teks';
     try {
       final uri = Uri.parse(_formattedUrl);
-      if (uri.host.isNotEmpty) {
-        return uri.host;
-      }
+      if (uri.host.isNotEmpty) return uri.host;
     } catch (_) {}
-    return 'Web Link';
+    return 'Link';
   }
 
-  /// Security status info (HTTPS vs HTTP vs Dangerous vs Text)
   _SecurityInfo get _securityInfo {
     final trimmed = rawContent.trim().toLowerCase();
     if (_isDangerousUrl) {
       return const _SecurityInfo(
-        label: 'BERBAHAYA - Blokir',
+        label: 'BERBAHAYA',
         icon: Icons.dangerous_rounded,
-        color: Color(0xFFEF4444), // Red
-        backgroundColor: Color(0xFF7F1D1D),
+        color: Color(0xFFEF4444),
       );
     } else if (trimmed.startsWith('https://')) {
       return const _SecurityInfo(
-        label: 'HTTPS (Aman / Secure)',
+        label: 'HTTPS',
         icon: Icons.lock_rounded,
-        color: Color(0xFF10B981), // Emerald Green
-        backgroundColor: Color(0xFF064E3B),
+        color: Color(0xFF6EE7B7),
       );
     } else if (trimmed.startsWith('http://')) {
       return const _SecurityInfo(
-        label: 'HTTP (Tidak Terenkripsi)',
-        icon: Icons.gpp_maybe_rounded,
-        color: Color(0xFFF59E0B), // Amber Warning
-        backgroundColor: Color(0xFF78350F),
+        label: 'HTTP',
+        icon: Icons.lock_open_rounded,
+        color: Color(0xFFFBBF24),
       );
     } else if (_isUrl) {
       return const _SecurityInfo(
-        label: 'HTTPS (Default)',
+        label: 'HTTPS',
         icon: Icons.shield_rounded,
-        color: Color(0xFF0EA5E9), // Ocean Blue
-        backgroundColor: Color(0xFF0C4A6E),
+        color: Color(0xFF9CA3AF),
       );
     } else {
       return const _SecurityInfo(
-        label: 'Teks Biasa',
+        label: 'TEKS',
         icon: Icons.notes_rounded,
-        color: Color(0xFF8B5CF6), // Purple
-        backgroundColor: Color(0xFF4C1D95),
+        color: Color(0xFF9CA3AF),
       );
     }
   }
@@ -134,23 +121,18 @@ class LinkPreviewSheet extends StatelessWidget {
     final isWebUrl = _isUrl;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E293B), // Dark Slate
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black54,
-            blurRadius: 25,
-            spreadRadius: 5,
-            offset: Offset(0, -5),
-          ),
-        ],
+      decoration: BoxDecoration(
+        color: const Color(0xFF161616),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(
+          top: BorderSide(color: Colors.white.withValues(alpha: 0.07), width: 1),
+        ),
       ),
-      padding: const EdgeInsets.only(
-        top: 12,
+      padding: EdgeInsets.only(
+        top: 0,
         left: 20,
         right: 20,
-        bottom: 24,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
       ),
       child: SafeArea(
         top: false,
@@ -158,42 +140,43 @@ class LinkPreviewSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Drag Handle Bar (Google Lens style)
+            // Drag handle
             Center(
               child: Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 20),
+                width: 36,
+                height: 3,
+                margin: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
 
-            // Header Section: Google Scan Style Header
+            // Header
             Row(
               children: [
-                // Icon Badge
+                // Icon
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: security.backgroundColor.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: security.color.withValues(alpha: 0.4),
-                      width: 1.5,
+                      color: Colors.white.withValues(alpha: 0.07),
+                      width: 1,
                     ),
                   ),
                   child: Icon(
                     isWebUrl ? Icons.language_rounded : Icons.text_snippet_rounded,
-                    color: security.color,
-                    size: 26,
+                    size: 20,
+                    color: Colors.white.withValues(alpha: 0.55),
                   ),
                 ),
-                const SizedBox(width: 14),
-                // Title and Security Tag
+                const SizedBox(width: 12),
+
+                // Title + tag
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,41 +187,30 @@ class LinkPreviewSheet extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.3,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.2,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: security.backgroundColor,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(
-                            color: security.color.withValues(alpha: 0.3),
-                            width: 1,
+                      Row(
+                        children: [
+                          Icon(
+                            security.icon,
+                            size: 11,
+                            color: security.color,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              security.icon,
-                              size: 12,
+                          const SizedBox(width: 4),
+                          Text(
+                            security.label,
+                            style: TextStyle(
                               color: security.color,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.0,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              security.label,
-                              style: TextStyle(
-                                color: security.color,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -246,17 +218,17 @@ class LinkPreviewSheet extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Link / Raw Content Box
+            // Content box
             Container(
-              constraints: const BoxConstraints(maxHeight: 120),
+              constraints: const BoxConstraints(maxHeight: 100),
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(14),
+                color: Colors.white.withValues(alpha: 0.04),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: Colors.white.withValues(alpha: 0.07),
                   width: 1,
                 ),
               ),
@@ -265,24 +237,58 @@ class LinkPreviewSheet extends StatelessWidget {
                 child: SelectableText(
                   rawContent,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 13,
-                    height: 1.4,
+                    color: Colors.white.withValues(alpha: 0.75),
+                    fontSize: 12,
+                    height: 1.5,
                     fontFamily: 'monospace',
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
 
-            // Action Buttons Section
+            // Danger warning
+            if (_isDangerousUrl)
+              Container(
+                margin: const EdgeInsets.only(bottom: 14),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.20),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_rounded,
+                        size: 14, color: Color(0xFFEF4444)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'QR code ini mengandung URL berbahaya dan diblokir.',
+                        style: TextStyle(
+                          color: const Color(0xFFEF4444).withValues(alpha: 0.85),
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // Action buttons
             Row(
               children: [
-                // Secondary Button: Copy Link
+                // Copy button
                 Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () {
+                  child: _SheetButton(
+                    label: 'Salin',
+                    icon: Icons.copy_rounded,
+                    onTap: () {
                       Clipboard.setData(ClipboardData(text: rawContent));
                       if (onCopy != null) {
                         onCopy!();
@@ -290,114 +296,54 @@ class LinkPreviewSheet extends StatelessWidget {
                         Navigator.of(context).pop(LinkPreviewAction.copy);
                       }
                     },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.2),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.copy_rounded,
-                      size: 18,
-                      color: Colors.white,
-                    ),
-                    label: const Text(
-                      'Salin Link',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    style: _SheetButtonStyle.outline,
                   ),
                 ),
-
-                const SizedBox(width: 12),
-
-                // Primary Action Button: Open Web / Open Link
+                const SizedBox(width: 10),
+                // Open button
                 Expanded(
-                  flex: 1,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF0EA5E9),
-                          Color(0xFF0284C7),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF0EA5E9).withValues(alpha: 0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton.icon(
-                      // Block dangerous URLs from being opened
-                      onPressed: _isDangerousUrl
-                          ? null
-                          : () {
-                              if (onOpen != null) {
-                                onOpen!();
-                              } else {
-                                Navigator.of(context).pop(LinkPreviewAction.open);
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      icon: Icon(
-                        isWebUrl ? Icons.open_in_browser_rounded : Icons.check_circle_rounded,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      label: Text(
-                        isWebUrl ? 'Buka Link' : 'Gunakan',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                  flex: 2,
+                  child: _SheetButton(
+                    label: isWebUrl ? 'Buka Link' : 'Gunakan',
+                    icon: isWebUrl
+                        ? Icons.open_in_browser_rounded
+                        : Icons.check_circle_rounded,
+                    onTap: _isDangerousUrl
+                        ? null
+                        : () {
+                            if (onOpen != null) {
+                              onOpen!();
+                            } else {
+                              Navigator.of(context).pop(LinkPreviewAction.open);
+                            }
+                          },
+                    style: _SheetButtonStyle.primary,
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
-            // Rescan / Tutup Button
+            // Rescan button
             Center(
-              child: TextButton.icon(
-                onPressed: () {
+              child: GestureDetector(
+                onTap: () {
                   if (onRescan != null) {
                     onRescan!();
                   } else {
                     Navigator.of(context).pop(LinkPreviewAction.rescan);
                   }
                 },
-                icon: const Icon(
-                  Icons.qr_code_scanner_rounded,
-                  size: 16,
-                  color: Colors.white60,
-                ),
-                label: const Text(
-                  'Scan Lagi',
-                  style: TextStyle(
-                    color: Colors.white60,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'Scan Lagi',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.28),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
@@ -409,16 +355,83 @@ class LinkPreviewSheet extends StatelessWidget {
   }
 }
 
+// ─── Button style helper ────────────────────────────────────────────────────────
+
+enum _SheetButtonStyle { outline, primary }
+
+class _SheetButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final VoidCallback? onTap;
+  final _SheetButtonStyle style;
+
+  const _SheetButton({
+    required this.label,
+    required this.icon,
+    required this.onTap,
+    required this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDisabled = onTap == null;
+    final isPrimary = style == _SheetButtonStyle.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        decoration: BoxDecoration(
+          color: isPrimary
+              ? Colors.white.withValues(alpha: isDisabled ? 0.03 : 0.10)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: isDisabled ? 0.06 : 0.12),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isDisabled
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : Colors.white.withValues(alpha: isPrimary ? 0.9 : 0.55),
+            ),
+            const SizedBox(width: 7),
+            Text(
+              label,
+              style: TextStyle(
+                color: isDisabled
+                    ? Colors.white.withValues(alpha: 0.18)
+                    : Colors.white.withValues(alpha: isPrimary ? 0.9 : 0.65),
+                fontSize: 13,
+                fontWeight:
+                    isPrimary ? FontWeight.w600 : FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Security info model ────────────────────────────────────────────────────────
+
 class _SecurityInfo {
   final String label;
   final IconData icon;
   final Color color;
-  final Color backgroundColor;
 
   const _SecurityInfo({
     required this.label,
     required this.icon,
     required this.color,
-    required this.backgroundColor,
   });
 }

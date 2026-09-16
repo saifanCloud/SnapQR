@@ -9,27 +9,35 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // Setup fade-in animation for UI elements
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1000),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+      ),
+    );
+    _scaleAnimation = Tween<double>(begin: 0.88, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
+      ),
     );
 
     _animationController.forward();
-
-    // Automatically navigate after 2 seconds
-    Timer(const Duration(seconds: 2), _navigateToHome);
+    Timer(const Duration(milliseconds: 2200), _navigateToHome);
   }
 
   @override
@@ -42,14 +50,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => const HomeScreen(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const HomeScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
+          return FadeTransition(opacity: animation, child: child);
         },
-        transitionDuration: const Duration(milliseconds: 600),
+        transitionDuration: const Duration(milliseconds: 500),
       ),
     );
   }
@@ -57,106 +63,112 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF0F172A), // Deep Slate Navy
-              Color(0xFF020617), // Rich Midnight Black
-            ],
-          ),
-        ),
-        child: FadeTransition(
-          opacity: _fadeAnimation,
+      backgroundColor: const Color(0xFF111111),
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: ScaleTransition(
+          scale: _scaleAnimation,
           child: SafeArea(
             child: Stack(
               children: [
+                // Subtle radial glow behind logo
+                Center(
+                  child: Container(
+                    width: 220,
+                    height: 220,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          const Color(0xFFFFFFFF).withValues(alpha: 0.04),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
                 Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // App Logo container with a subtle glow/shadow
+                      // Circular Emblem Logo
                       Container(
-                        width: 100,
-                        height: 100,
+                        width: 140,
+                        height: 140,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
+                          shape: BoxShape.circle,
+                          color: Colors.white,
                           border: Border.all(
-                            color: const Color(0xFF0EA5E9).withValues(alpha: 0.4),
+                            color: Colors.white.withValues(alpha: 0.15),
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF0EA5E9).withValues(alpha: 0.25),
-                              blurRadius: 30,
-                              spreadRadius: 4,
+                              color: Colors.black.withValues(alpha: 0.55),
+                              blurRadius: 40,
+                              spreadRadius: 6,
+                              offset: const Offset(0, 10),
+                            ),
+                            BoxShadow(
+                              color: Colors.white.withValues(alpha: 0.06),
+                              blurRadius: 20,
+                              spreadRadius: 2,
                             ),
                           ],
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(22),
+                        child: ClipOval(
                           child: Image.asset(
                             'assets/logo.png',
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
-                      // App Title
-                      const Text(
-                        'CLOUD SCANNER',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 4.0,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Muted Subtitle
+
+                      const SizedBox(height: 26),
+
                       Text(
-                        'Enterprise QR Scanner & Logger',
+                        'FAST & SECURE SCANNER',
                         style: TextStyle(
-                          fontSize: 13,
-                          letterSpacing: 1.0,
-                          color: const Color(0xFF94A3B8).withValues(alpha: 0.8),
+                          fontSize: 11,
+                          letterSpacing: 3.5,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.40),
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Bottom loading indicator
+
+                // Bottom indicator
                 Positioned(
-                  bottom: 60,
+                  bottom: 52,
                   left: 0,
                   right: 0,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFF0EA5E9),
-                            ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white.withValues(alpha: 0.35),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Initializing...',
-                          style: TextStyle(
-                            fontSize: 11,
-                            letterSpacing: 1.0,
-                            color: const Color(0xFF94A3B8).withValues(alpha: 0.6),
-                          ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        'LOADING',
+                        style: TextStyle(
+                          fontSize: 9,
+                          letterSpacing: 3.0,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.25),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],
