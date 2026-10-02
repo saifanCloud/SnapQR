@@ -62,8 +62,12 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF0C0C0C) : const Color(0xFFF7F7F7);
+    final textColor = isDark ? Colors.white : const Color(0xFF111111);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF111111),
+      backgroundColor: bgColor,
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: ScaleTransition(
@@ -80,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen>
                       shape: BoxShape.circle,
                       gradient: RadialGradient(
                         colors: [
-                          const Color(0xFFFFFFFF).withValues(alpha: 0.04),
+                          (isDark ? Colors.white : Colors.black).withValues(alpha: 0.04),
                           Colors.transparent,
                         ],
                       ),
@@ -100,20 +104,15 @@ class _SplashScreenState extends State<SplashScreen>
                           shape: BoxShape.circle,
                           color: Colors.white,
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.15),
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.1),
                             width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.55),
+                              color: Colors.black.withValues(alpha: isDark ? 0.55 : 0.15),
                               blurRadius: 40,
                               spreadRadius: 6,
                               offset: const Offset(0, 10),
-                            ),
-                            BoxShadow(
-                              color: Colors.white.withValues(alpha: 0.06),
-                              blurRadius: 20,
-                              spreadRadius: 2,
                             ),
                           ],
                         ),
@@ -132,8 +131,8 @@ class _SplashScreenState extends State<SplashScreen>
                         style: TextStyle(
                           fontSize: 11,
                           letterSpacing: 3.5,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.40),
+                          fontWeight: FontWeight.w600,
+                          color: textColor.withValues(alpha: 0.45),
                         ),
                       ),
                     ],
@@ -154,7 +153,7 @@ class _SplashScreenState extends State<SplashScreen>
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white.withValues(alpha: 0.35),
+                            textColor.withValues(alpha: 0.35),
                           ),
                         ),
                       ),
@@ -164,8 +163,8 @@ class _SplashScreenState extends State<SplashScreen>
                         style: TextStyle(
                           fontSize: 9,
                           letterSpacing: 3.0,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.25),
+                          fontWeight: FontWeight.w600,
+                          color: textColor.withValues(alpha: 0.3),
                         ),
                       ),
                     ],

@@ -95,7 +95,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
     // Security: reject oversized payloads
     if (rawValue.length > 4096) {
-      _showSnackBar('QR code terlalu panjang.', isError: true);
+      _showSnackBar('QR code payload is too long.', isError: true);
       return;
     }
 
@@ -111,7 +111,7 @@ class _ScannerScreenState extends State<ScannerScreen>
     if (action == LinkPreviewAction.open) {
       Navigator.of(context).pop(ScanResult(url: rawValue, shouldLaunch: true));
     } else if (action == LinkPreviewAction.copy) {
-      _showSnackBar('Link berhasil disalin!');
+      _showSnackBar('Link copied to clipboard!');
       Navigator.of(context).pop(ScanResult(url: rawValue, shouldLaunch: false));
     } else {
       try {
@@ -126,7 +126,7 @@ class _ScannerScreenState extends State<ScannerScreen>
 
     setState(() => _isProcessingGallery = true);
 
-    // Hentikan kamera live agar resource kamera tidak bentrok
+    // Stop live camera to avoid resource conflict
     try {
       await _controller.stop();
     } catch (_) {}
@@ -140,7 +140,7 @@ class _ScannerScreenState extends State<ScannerScreen>
       );
 
       if (image == null) {
-        // Pengguna membatalkan pemilihan gambar
+        // User cancelled image selection
         _isProcessingGallery = false;
         if (mounted && !_isScanCompleted && _cameraPermissionStatus == PermissionStatus.granted) {
           try {
@@ -157,7 +157,7 @@ class _ScannerScreenState extends State<ScannerScreen>
       String? detectedValue;
 
       if (kIsWeb) {
-        // Platform Web: Dekode byte gambar menggunakan QrImageDecoder (zxing2)
+        // Web Platform: Decode image bytes using QrImageDecoder (zxing2)
         try {
           final bytes = await image.readAsBytes();
           detectedValue = QrImageDecoder.decodeBytes(bytes);
@@ -165,7 +165,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           debugPrint('Web QR decode error: $e');
         }
       } else {
-        // Platform Native (Android/iOS): Coba ML Kit terlebih dahulu
+        // Native Platform (Android/iOS): Try ML Kit first
         try {
           final BarcodeCapture? barcode = await _controller.analyzeImage(image.path);
           if (barcode != null && barcode.barcodes.isNotEmpty) {
@@ -181,7 +181,7 @@ class _ScannerScreenState extends State<ScannerScreen>
           debugPrint('Mobile ML Kit analyzeImage error: $e');
         }
 
-        // Fallback jika ML Kit tidak mendeteksi: gunakan pure Dart decoder
+        // Fallback if ML Kit does not detect: use pure Dart decoder
         if (detectedValue == null || detectedValue.isEmpty) {
           try {
             final bytes = await image.readAsBytes();
@@ -202,13 +202,13 @@ class _ScannerScreenState extends State<ScannerScreen>
         return;
       }
 
-      _showSnackBar('Tidak ada QR Code ditemukan dalam gambar ini.');
+      _showSnackBar('No QR code found in this image.');
     } catch (e) {
-      debugPrint('Error memindai gambar dari galeri: $e');
+      debugPrint('Error scanning gallery image: $e');
       if (mounted) {
         setState(() => _isAnalyzing = false);
       }
-      _showSnackBar('Gagal membaca gambar. Pastikan gambar jelas.', isError: true);
+      _showSnackBar('Failed to read image. Make sure it is clear.', isError: true);
     } finally {
       _isProcessingGallery = false;
       if (mounted && !_isScanCompleted && _cameraPermissionStatus == PermissionStatus.granted) {
@@ -286,7 +286,7 @@ class _ScannerScreenState extends State<ScannerScreen>
             ),
             const SizedBox(height: 20),
             const Text(
-              'Akses Kamera Diperlukan',
+              'Camera Access Required',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -296,8 +296,8 @@ class _ScannerScreenState extends State<ScannerScreen>
             const SizedBox(height: 10),
             Text(
               isPermanentlyDenied
-                  ? 'Izin kamera ditolak secara permanen. Buka Pengaturan HP untuk mengaktifkannya.'
-                  : 'Aplikasi membutuhkan akses kamera untuk memindai QR Code.',
+                  ? 'Camera permission permanently denied. Open settings to enable it.'
+                  : 'This app requires camera access to scan QR codes.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.40),
@@ -321,7 +321,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                   ),
                 ),
                 child: Text(
-                  isPermanentlyDenied ? 'Buka Pengaturan' : 'Izinkan Akses Kamera',
+                  isPermanentlyDenied ? 'Open Settings' : 'Grant Camera Access',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -421,7 +421,7 @@ class _ScannerScreenState extends State<ScannerScreen>
               },
             ),
           ],
-          // Gallery (selalu dapat diakses)
+          // Gallery (always accessible)
           _buildAppBarAction(
             icon: Icons.photo_library_outlined,
             isActive: _isProcessingGallery,
@@ -453,8 +453,8 @@ class _ScannerScreenState extends State<ScannerScreen>
               controller: _controller,
               errorBuilder: (context, error) {
                 final msg = error.errorCode == MobileScannerErrorCode.permissionDenied
-                    ? 'Izin kamera ditolak.'
-                    : 'Kamera tidak tersedia.';
+                    ? 'Camera permission denied.'
+                    : 'Camera is unavailable.';
                 return Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -486,7 +486,7 @@ class _ScannerScreenState extends State<ScannerScreen>
                                       Colors.white.withValues(alpha: 0.12)),
                             ),
                             child: const Text(
-                              'Coba Lagi',
+                              'Try Again',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,
