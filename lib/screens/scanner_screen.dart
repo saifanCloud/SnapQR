@@ -595,7 +595,7 @@ class _ScannerScreenState extends State<ScannerScreen>
               right: 0,
               child: Center(
                 child: Text(
-                  'Arahkan QR code ke dalam bingkai',
+                  'Hold your camera over a QR code to scan',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.40),
                     fontSize: 12,
